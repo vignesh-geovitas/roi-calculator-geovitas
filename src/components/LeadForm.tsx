@@ -113,7 +113,7 @@ export default function LeadForm({ inputs, model }: LeadFormProps) {
               value={value}
               placeholder={placeholder}
               onChange={(e) => setter(e.target.value)}
-              className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-brand-cyan focus:ring-1 focus:ring-brand-cyan focus:outline-none"
+              className="w-full rounded-md border border-slate-300 px-3 py-2 text-base focus:border-brand-cyan focus:ring-1 focus:ring-brand-cyan focus:outline-none sm:text-sm"
             />
           </div>
         ))}

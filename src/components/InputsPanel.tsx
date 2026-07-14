@@ -34,7 +34,7 @@ export default function InputsPanel({ inputs, onChange }: InputsPanelProps) {
   const tier = TIER_PRICING[inputs.gf360Tier];
 
   return (
-    <div className="space-y-5">
+    <div className="min-w-0 space-y-5">
       <SectionCard icon={<Building2 className="size-4" />} title="Company Profile">
         <SliderField
           label="Annual turnover"
@@ -104,7 +104,7 @@ export default function InputsPanel({ inputs, onChange }: InputsPanelProps) {
             id="tier-select"
             value={inputs.gf360Tier}
             onChange={(e) => onChange({ gf360Tier: e.target.value as Tier })}
-            className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm font-semibold focus:border-brand-cyan focus:ring-1 focus:ring-brand-cyan focus:outline-none"
+            className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-base font-semibold focus:border-brand-cyan focus:ring-1 focus:ring-brand-cyan focus:outline-none sm:text-sm"
           >
             {(Object.keys(TIER_PRICING) as Tier[]).map((t) => (
               <option key={t} value={t}>

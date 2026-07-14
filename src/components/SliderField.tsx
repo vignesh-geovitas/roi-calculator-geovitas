@@ -33,7 +33,7 @@ export default function SliderField({
           max={max}
           step={step}
           onChange={(e) => onChange(Number(e.target.value))}
-          className="w-24 rounded-md border border-slate-300 px-2 py-1 text-right text-sm font-semibold tabular-nums focus:border-brand-cyan focus:ring-1 focus:ring-brand-cyan focus:outline-none"
+          className="w-24 rounded-md border border-slate-300 px-2 py-1 text-right text-base font-semibold tabular-nums focus:border-brand-cyan focus:ring-1 focus:ring-brand-cyan focus:outline-none sm:text-sm"
         />
       </div>
       <input

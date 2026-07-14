@@ -51,12 +51,12 @@ export default function App() {
           </p>
         </div>
 
-        <div className="grid gap-6 lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)]">
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)]">
           {/* Left column — inputs */}
           <InputsPanel inputs={inputs} onChange={patch} />
 
           {/* Right column — live results */}
-          <div className="space-y-5">
+          <div className="min-w-0 space-y-5">
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
               <StatCard
                 hero

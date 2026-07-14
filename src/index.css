@@ -16,10 +16,18 @@
 
 html {
   scroll-behavior: smooth;
+  /* Opt out of Chrome Android auto-dark theming — the brand UI is light-only */
+  color-scheme: only light;
 }
 
 body {
   @apply bg-slate-50 text-brand-dark antialiased;
+}
+
+button,
+input,
+select {
+  touch-action: manipulation;
 }
 
 /* Brand-tinted range sliders */
@@ -31,4 +39,17 @@ input[type="range"]::-webkit-slider-thumb {
 }
 input[type="range"]::-moz-range-thumb {
   @apply size-4 rounded-full border-2 border-white bg-brand-cyan shadow;
+}
+
+/* Bigger touch targets on coarse pointers (phones/tablets) */
+@media (pointer: coarse) {
+  input[type="range"] {
+    @apply h-2;
+  }
+  input[type="range"]::-webkit-slider-thumb {
+    @apply size-6;
+  }
+  input[type="range"]::-moz-range-thumb {
+    @apply size-6;
+  }
 }
