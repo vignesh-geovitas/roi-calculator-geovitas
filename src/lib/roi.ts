@@ -41,6 +41,13 @@ export const TIER_PRICING: Record<Tier, TierPricing> = {
   },
 };
 
+/** Tier bands from the 'Pricing Tiers' sheet — recommended, never asked. */
+export function recommendTier(annualTurnoverCr: number): Tier {
+  if (annualTurnoverCr < 100) return "Starter";
+  if (annualTurnoverCr <= 500) return "Growth";
+  return "Enterprise";
+}
+
 export interface RoiInputs {
   annualTurnover: number; // Rs Cr
   annualEnergySpend: number; // Rs Lakh

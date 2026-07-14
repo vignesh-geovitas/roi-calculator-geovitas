@@ -1,8 +1,17 @@
 import { useMemo, useState } from "react";
-import { BarChart3, Clock, TrendingUp } from "lucide-react";
+import {
+  AlertTriangle,
+  ArrowRight,
+  BadgeCheck,
+  Hourglass,
+  Lock,
+  Timer,
+  TrendingUp,
+} from "lucide-react";
 import type { RoiInputs } from "./lib/roi";
-import { computeRoi, DEFAULT_INPUTS } from "./lib/roi";
+import { computeRoi, DEFAULT_INPUTS, recommendTier, TIER_PRICING } from "./lib/roi";
 import { formatLakh, formatPayback, formatNumber } from "./lib/format";
+import { useCountUp } from "./lib/useCountUp";
 import InputsPanel from "./components/InputsPanel";
 import StatCard from "./components/StatCard";
 import RoiChart from "./components/RoiChart";
@@ -22,7 +31,17 @@ function Wordmark() {
 
 export default function App() {
   const [inputs, setInputs] = useState<RoiInputs>(DEFAULT_INPUTS);
-  const model = useMemo(() => computeRoi(inputs), [inputs]);
+  const [leadSubmitted, setLeadSubmitted] = useState(false);
+
+  const tier = recommendTier(inputs.annualTurnover);
+  const model = useMemo(
+    () => computeRoi({ ...inputs, gf360Tier: tier }),
+    [inputs, tier],
+  );
+
+  const costOfInaction = useCountUp(model.totalCostOfInaction);
+  const netBenefit = useCountUp(model.totalNetBenefit);
+  const monthlyBleed = useCountUp(model.yr1.costOfInaction / 12);
 
   const patch = (p: Partial<RoiInputs>) =>
     setInputs((prev) => ({ ...prev, ...p }));
@@ -39,76 +58,158 @@ export default function App() {
         </div>
       </header>
 
-      <main className="mx-auto max-w-6xl px-4 py-8 sm:px-6">
+      <main className="mx-auto max-w-6xl px-4 pt-8 pb-28 sm:px-6 lg:pb-10">
+        {/* ——— Hero: problem, promise, zero friction ——— */}
         <div className="mb-8 max-w-3xl">
-          <h1 className="text-2xl font-bold text-brand-dark sm:text-3xl">
-            What is carbon compliance worth to your business?
+          <p className="text-xs font-bold tracking-widest text-brand-cyan uppercase">
+            For Indian manufacturers exporting to the EU
+          </p>
+          <h1 className="mt-2 text-2xl leading-tight font-bold text-brand-dark sm:text-4xl">
+            The EU is taxing the carbon in your exports.
+            <br className="hidden sm:block" /> Every year you wait, the bill
+            compounds.
           </h1>
-          <p className="mt-2 text-sm leading-relaxed text-slate-600">
-            Model your 5-year return from GF360 — CBAM cost avoidance, energy
-            efficiency savings, and automated ESG reporting — against the cost
-            of doing nothing. Adjust the inputs; results update live.
+          <p className="mt-3 text-sm leading-relaxed text-slate-600 sm:text-base">
+            See what doing nothing costs you over the next 5 years — and how
+            fast fixing it pays for itself. Six inputs, sixty seconds. Your
+            number appears instantly:{" "}
+            <strong className="text-brand-dark">
+              no email, no call, no spreadsheet.
+            </strong>
           </p>
         </div>
 
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)]">
-          {/* Left column — inputs */}
           <InputsPanel inputs={inputs} onChange={patch} />
 
-          {/* Right column — live results */}
           <div className="min-w-0 space-y-5">
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            <p className="text-xs font-bold tracking-widest text-brand-cyan uppercase">
+              Step 2 · What the numbers say
+            </p>
+
+            {/* ——— Agitate, then resolve ——— */}
+            <div className="grid gap-4 sm:grid-cols-2">
               <StatCard
-                hero
+                tone="dark"
+                icon={AlertTriangle}
+                label="If you do nothing"
+                value={formatLakh(costOfInaction)}
+                hint="your 5-year cost of inaction — CBAM settled at penalty default values, consultant fees, manual reporting"
+              />
+              <StatCard
+                icon={Hourglass}
+                label="Every month you wait"
+                value={formatLakh(monthlyBleed)}
+                hint="of that cost accrues — whether you measure it or not"
+              />
+              <StatCard
+                tone="hero"
                 icon={TrendingUp}
-                label="5-Year Net Benefit"
-                value={formatLakh(model.totalNetBenefit)}
-                hint={`on ${formatLakh(model.totalInvestment)} total investment`}
+                label="If you act now"
+                value={formatLakh(netBenefit)}
+                hint={`5-year net benefit — after every rupee of GF360 investment (${formatNumber(model.roiMultiple, 1)}× return)`}
               />
               <StatCard
-                icon={Clock}
-                label="Payback Period"
+                icon={Timer}
+                label="Pays for itself in"
                 value={formatPayback(model.paybackMonths)}
-                hint="to recover one-time implementation"
-              />
-              <StatCard
-                icon={BarChart3}
-                label="5-Year ROI"
-                value={`${formatNumber(model.roiMultiple, 1)}×`}
-                hint="net benefit per rupee invested"
+                hint={
+                  model.paybackMonths === null
+                    ? "at these inputs the investment doesn't clear within 5 years — talk to us about Starter"
+                    : "after that, every month is upside"
+                }
               />
             </div>
 
+            <p className="flex items-center gap-2 rounded-lg bg-brand-cyan/5 px-4 py-3 text-xs text-slate-600">
+              <BadgeCheck className="size-4 shrink-0 text-brand-cyan" aria-hidden />
+              <span>
+                Modelled on the <strong>{tier}</strong> plan —{" "}
+                {TIER_PRICING[tier].band}, sized automatically from your
+                turnover. Plan details are in your report.
+              </span>
+            </p>
+
+            {/* ——— Proof: the gap, year by year ——— */}
             <section className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
               <h2 className="text-sm font-bold tracking-wide text-brand-dark uppercase">
-                Cost of Inaction vs Net Benefit
+                The gap compounds every year
               </h2>
               <p className="mt-0.5 mb-4 text-xs text-slate-500">
-                Year-by-year, ₹ Lakh. Cost of inaction = CBAM at default values
-                + consultant fees + manual reporting effort.
+                Blue is what standing still costs. Green is what acting nets
+                you — both from your inputs, year by year (₹ Lakh).
               </p>
               <RoiChart model={model} />
-            </section>
-
-            <section className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
-              <h2 className="mb-3 text-sm font-bold tracking-wide text-brand-dark uppercase">
-                5-Year Projection Detail
-              </h2>
-              <YearTable model={model} />
               <p className="mt-3 text-[11px] leading-relaxed text-slate-400">
-                Assumes {formatNumber(8)}% annual revenue growth, 5% annual
-                subscription/advisory escalation, 70% reporting-effort
-                automation, and energy savings ramping 3% → 8% → 12% of energy
-                spend. CBAM exposure: {formatNumber(model.yr1.cbamEmissions)}{" "}
+                Every assumption is visible: 8% annual revenue growth, 5%
+                subscription escalation, 70% reporting-effort automation,
+                energy savings ramping 3% → 8% → 12% of energy spend. CBAM
+                exposure at your inputs: {formatNumber(model.yr1.cbamEmissions)}{" "}
                 tCO₂e in Year 1. Illustrative estimates — not a commercial
                 quote.
               </p>
             </section>
 
-            <LeadForm inputs={inputs} model={model} />
+            {/* ——— The gate: real value, one step away ——— */}
+            <section className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+              <h2 className="text-sm font-bold tracking-wide text-brand-dark uppercase">
+                Your year-by-year breakdown
+              </h2>
+              <div className="relative mt-3">
+                <div className="pointer-events-none blur-[5px] select-none" aria-hidden>
+                  <YearTable model={model} />
+                </div>
+                <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 rounded-lg bg-white/55 px-4 text-center">
+                  <span className="flex size-10 items-center justify-center rounded-full bg-brand-dark text-white shadow-md">
+                    <Lock className="size-4" aria-hidden />
+                  </span>
+                  <p className="max-w-sm text-sm text-slate-700">
+                    The full projection — investment, benefits and cumulative
+                    payback for all 5 years — is in your{" "}
+                    <strong>free report</strong>.
+                  </p>
+                  <a
+                    href="#report-form"
+                    className="flex items-center gap-1.5 rounded-md bg-brand-dark px-4 py-2 text-sm font-bold text-white shadow transition hover:opacity-90"
+                  >
+                    Unlock my full report
+                    <ArrowRight className="size-4" aria-hidden />
+                  </a>
+                </div>
+              </div>
+            </section>
+
+            <LeadForm
+              inputs={inputs}
+              model={model}
+              recommendedTier={tier}
+              onSubmitted={() => setLeadSubmitted(true)}
+            />
           </div>
         </div>
       </main>
+
+      {/* ——— Mobile sticky CTA — the result follows you to the form ——— */}
+      {!leadSubmitted && (
+        <div className="fixed inset-x-0 bottom-0 z-20 border-t border-slate-200 bg-white/95 px-4 py-3 backdrop-blur lg:hidden">
+          <div className="mx-auto flex max-w-xl items-center justify-between gap-3">
+            <div className="min-w-0">
+              <p className="text-[11px] tracking-wide text-slate-500 uppercase">
+                Your 5-yr net benefit
+              </p>
+              <p className="truncate text-lg font-bold text-chart-green">
+                {formatLakh(model.totalNetBenefit)}
+              </p>
+            </div>
+            <a
+              href="#report-form"
+              className="shrink-0 rounded-md bg-linear-to-r from-brand-cyan to-brand-green px-4 py-2.5 text-sm font-bold text-white shadow"
+            >
+              Get full report
+            </a>
+          </div>
+        </div>
+      )}
 
       <footer className="mt-4 border-t border-slate-200 bg-white">
         <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-2 px-4 py-5 text-xs text-slate-500 sm:flex-row sm:px-6">
